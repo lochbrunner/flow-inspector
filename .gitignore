@@ -1,1 +1,4 @@
 build
+assets
+node_modules
+target
