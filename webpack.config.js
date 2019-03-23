@@ -3,9 +3,10 @@ var path = require('path');
 var package = require('./package.json');
 
 // variables
-var isProduction = process.argv.indexOf('-p') >= 0 || process.env.NODE_ENV === 'production';
+var isProduction =
+  process.argv.indexOf('-p') >= 0 || process.env.NODE_ENV === 'production';
 var sourcePath = path.join(__dirname, './client');
-var outPath = path.join(__dirname, './assets');
+var outPath = path.join(__dirname, './dist');
 
 // plugins
 var HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -25,8 +26,9 @@ module.exports = {
   target: 'web',
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    // Fix webpack's default behavior to not load packages with jsnext:main module
-    // (jsnext:main directs not usually distributable es6 format, but es6 sources)
+    // Fix webpack's default behavior to not load packages with jsnext:main
+    // module (jsnext:main directs not usually distributable es6 format, but es6
+    // sources)
     mainFields: ['module', 'browser', 'main'],
     alias: {
       app: path.resolve(__dirname, 'client/')
@@ -49,10 +51,9 @@ module.exports = {
       },
       // css
       {
-        test: /\.css$/,
+        test: /\.s?css$/,
         use: [
-          isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
-          {
+          isProduction ? MiniCssExtractPlugin.loader : 'style-loader', {
             loader: 'css-loader',
             query: {
               modules: true,
@@ -69,8 +70,7 @@ module.exports = {
                 require('postcss-import')({
                   addDependencyTo: webpack
                 }),
-                require('postcss-url')(),
-                require('postcss-preset-env')({
+                require('postcss-url')(), require('postcss-preset-env')({
                   /* use stage 2 features (defaults) */
                   stage: 2
                 }),
@@ -80,6 +80,9 @@ module.exports = {
                 })
               ]
             }
+          },
+          {
+            loader: 'sass-loader'
           }
         ]
       },
@@ -91,8 +94,7 @@ module.exports = {
       {
         test: /\.(a?png|svg)$/,
         use: 'url-loader?limit=10000'
-      },
-      {
+      }, {
         test: /\.(jpe?g|gif|bmp|mp3|mp4|ogg|wav|eot|ttf|woff|woff2)$/,
         use: 'file-loader'
       }
@@ -118,7 +120,8 @@ module.exports = {
   },
   plugins: [
     new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV is defined
+      NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV
+      // is defined
       DEBUG: false
     }),
     new WebpackCleanupPlugin(),
@@ -154,7 +157,11 @@ module.exports = {
       disableDotRule: true
     },
     stats: 'minimal',
-    clientLogLevel: 'warning'
+    clientLogLevel: 'warning',
+    proxy: {
+      '/api': 'http://localhost:8000',
+      '/ws': 'http://localhost:8000',
+    }
   },
   // https://webpack.js.org/configuration/devtool/
   devtool: isProduction ? 'hidden-source-map' : 'cheap-module-eval-source-map',
