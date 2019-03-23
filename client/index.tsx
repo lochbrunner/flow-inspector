@@ -10,6 +10,11 @@ import Home from './containers/home';
 const history = createBrowserHistory();
 const store = configureStore();
 
+const socket = new WebSocket('ws://' + window.location.host + '/ws');
+socket.onmessage = event => {
+    console.log(`Received: ${event.data}`)
+};
+
 ReactDOM.render(
     <Provider store={store}>
         <Router history={history}>
